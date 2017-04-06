@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>日历</title>
+	<style type="text/css">
+		#div1 {width: 350px;border: 1px solid #000;margin: 60px auto;position: relative;}
+		.change{width: 100%;height: 40px;position: relative;overflow: hidden;}
+		.change .lastM,.change .nextM{width: 40px;height: 24px;position: absolute;top: 8px;}
+		.change .lastM{left: 5px;}
+		.change .nextM{right: 5px;}
+		.change .timeNow{text-align: center;height: 40px;line-height: 40px;font-size: 14px;}
+        ul {margin: 0;padding: 0;list-style: none;}
+        #head {border-bottom: 1px solid #000;}
+        #head li {text-align: center;display: inline-block;width: 50px;height: 50px;line-height: 50px;float: left;font-weight: bold;}
+        .colorRed {color: red;}
+        .clear:after {content: '';width: 0;display:  block;clear: both;}
+        #list li {width: 50px;height: 50px;float: left;text-align: center;line-height: 50px;}
+        #list li.today {background: green;color: white;font-weight:bold;}
+        #list li.gray {color: gray;}
+       
+	</style>
+</head>
+<body>
+	<div id="div1">
+		<div class="change">
+			<button class="lastM"><</button>
+			<div class="timeNow"><span></span>年<span></span>月</div>
+			<button class="nextM">></button>
+		</div>
+		<ul id="head" class="clear">
+			<li class="colorRed">日</li>
+	        <li>一</li>
+	        <li>二</li>
+	        <li>三</li>
+	        <li>四</li>
+	        <li>五</li>
+	        <li class="colorRed">六</li>
+		</ul>
+		<ul id="list" class="clear"></ul>
+	</div>
+	<script type="text/javascript">
+		var list = document.querySelector("#div1 #list");
+		var lastM = document.querySelector(".lastM");
+		var nextM = document.querySelector(".nextM");
+		var spans = document.querySelectorAll(".timeNow span");
+		
+		//获取当前日期
+		var nowD = new Date();
+		var nowY = nowD.getFullYear();
+		var nowM = nowD.getMonth();
+		inputTime(nowY,nowM);
+		
+		/*
+		 * 这是一个之前做好的日历
+		 * 在3月31号我准备优化的时候，尽然出现了bug，纠结了很久，因为2月没有31天，T_T，原来只需要将日期同时更改就解决了；因为要扩展，所以我用了另外一种方法解决了；
+		 * 小bug： 
+		 * 这里上月和下月的设置时，只是将month进行了加减；
+		 * 当时间是2017年3月31日时，只改变月份，则日期会变为2017年2月31号，根据日期的自动纠错能力，日期会变为2017年3月3日；这里仍然是3月，而不是跳转到预期的二月份。
+		 * 解决方法：
+		 * 将月份减一时，同时将日期设置到每个月的1号。
+		*/
+		//上月
+		lastM.onclick = function(){
+			nowD.setMonth(nowD.getMonth()-1);
+			//nowD.setMonth(nowD.getMonth()-1,1);//修复bug
+			nowY = nowD.getFullYear();
+			nowM = nowD.getMonth();
+			inputTime(nowY,nowM);
+		}
+		//下月
+		nextM.onclick = function(){
+			nowD.setMonth(nowD.getMonth()+1);
+			//nowD.setMonth(nowD.getMonth()+1);//修复bug
+			nowY = nowD.getFullYear();
+			nowM = nowD.getMonth();
+			inputTime(nowY,nowM);
+		}
+		//动态输出日期
+		function inputTime(y,m){
+			spans[0].innerHTML = y;
+			spans[1].innerHTML = m+1;
+			
+			var cells = getCells(y,m);
+			var days = getCountDays(y,m);
+			var str = "";
+			var d = new Date(y,m,1,0,0,0);
+			var week = d.getDay() - 1;
+			for(var i=0;i<cells;i++){ 
+				var v = i-week;
+				if(v>0&&v<=days){
+					str += "<li>"+v+"</li>";
+				}else if(v<=0){
+					var lastDays = getCountDays(y,m-1)
+					str += "<li class='gray'>"+(lastDays+v)+"</li>";
+				}else{
+					str += "<li class='gray'>"+(v - days)+"</li>";
+				}
+			}
+			list.innerHTML = str;
+		}
+		//获取某年月需要的总格数
+		function getCells(y,m){
+			var d1 = new Date(y,m,1,0,0,0);
+			return Math.ceil((getCountDays(y,m) + d1.getDay())/7)*7;
+		}
+		
+		//获取指定年月的最大天数
+		function getCountDays(y,m){
+			//设置下个月的第一天
+			var d1 = new Date(y,m+1,1,0,0,0);
+			//设置时间为下个月的第一天往前减一天
+			d1.setDate(d1.getDate()-1);
+			//返回这一天的 日期号，即为本月的天数
+			return d1.getDate();
+		}
+		
+		
+	</script>
+</body>
+</html>

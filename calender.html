@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>日历</title>
+	<style type="text/css">
+		*{padding: 0;margin: 0;}
+		input,button{border: none;background: none;}
+		/*input::-webkit-input-placeholder {color: red;}*/ 
+		a{text-decoration: none;}
+		i{font-style: normal;}
+		#div1{width: 350px;margin: 60px auto;padding:0 10px 10px;position: relative;background: url(img/bg3.jpg) no-repeat;background-size: cover;}
+		#div1 .top{padding:10px;height: 30px;}
+		/*顶部每日一句*/
+		#div1 .top .voice{width: 80%;overflow: hidden;height: 30px;font-size: 14px;cursor: pointer;margin-top: 4px;}
+		#div1 .top .voice p{width: 120%;height: 30px;line-height: 30px;color: #103ab4;}
+		#div1 .top .voice span,#div1 .top .voice a{display: inline-block;height: 30px;line-height: 30px;overflow: hidden;text-overflow: ellipsis;padding-left: 10px;}
+		#div1 .top .voice span{max-width: 216px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+		#div1 .top .voice a{display: inline-block;color: #f5d107;text-decoration: underline;font-size: 13px;}
+		#div1 .top .voice p:nth-of-type(2){display: none;}
+		#div1 .top .voice p input,#div1 .top .voice p button{display: inline-block;line-height: 40px;height: 26px;line-height: 26px;}
+		#div1 .top .voice p input{padding-left: 10px;border: 1px solid #CCCCCC;margin-right: 10px;background: #c0c0c0;}
+		#div1 .top .voice p button{padding: 0 4px;color: #FFFFFF;}
+		#div1 .top .voice p button:nth-of-type(1){background: #30c356;margin-right: 2px;}
+		#div1 .top .voice p button:nth-of-type(2){background: #CCCCCC;}
+		/*canvas时钟*/
+		#clock{position: absolute;right: 18px;top: 5px;}
+		.change{width: 100%;height: 40px;position: relative;overflow: hidden;}
+		.change .prevM,.change .nextM{width: 40px;height: 24px;position: absolute;top: 8px;font-size: 20px;}
+		.change .prevM{left: 5px;}
+		.change .nextM{right: 5px;}
+		.change .timeNow{text-align: center;height: 40px;line-height: 40px;font-size: 14px;cursor: pointer;width: 140px;margin: 0 auto;}
+        ul {margin: 0;padding: 0;list-style: none;}
+        .change .timeNow span{padding: 0 10px;}
+        #head {border-bottom: 1px solid #EEEEEE;}
+        #head li {text-align: center;display: inline-block;width: 50px;height: 50px;line-height: 50px;float: left;font-weight: bold;}
+        .colorRed {color: red;}
+        .clear:after {content: '';width: 0;display:  block;clear: both;}
+        #list li {width: 50px;height: 36px;float: left;text-align: center;cursor: pointer;padding-top: 10px;}
+        #list li span{display: block;line-height: 24px;}
+        #list li em{display: block;line-height: 12px;font-size: 12px;color: red;font-style: normal;}
+         #list li.today{background: url(img/todybg.png) no-repeat center top;background-size: contain;}
+        #list li.today span{color: #333333;font-weight:bold;}
+        #list li.gray {color: gray;}
+        #list li.red {color: red;}
+        /*弹出框*/
+       .box{width: 260px;height: 180px;padding:10px 0;position: absolute;left: 50%;top: 70px;margin-left: -140px;background: #ffffff;border: 1px solid #CCCCCC;opaci ty: 0.8;text-align: center;display: none;}
+       .box h3{width: 100%;height: 30px;line-height: 30px;font-size: 20px;font-weight: normal;text-align: left;margin: 0;padding: 0 10px;}
+       .box .yChoose,.box .mChoose{width: 30%;height: 90px;display: inline-block;margin: 10px;background: #eeeeee;position: relative;}
+       .box .yChoose input,.box .mChoose input{width: 100%;height: 30px;line-height: 30px;position: absolute;left: 0;top: 30px;z-index: 11;display: none;font-size: 16px;text-align: center;background: #EEEEEE;}
+       .box button{color: #000000;font-weight: bold;font-size: 20px;background: #999999;border: none;color: #FFFFFF;}
+       .box button:nth-of-type(1){border-top-right-radius: 5px;border-top-left-radius: 5px;}
+       .box button:nth-of-type(2){border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;}
+       .box button,.box ul li{display: inline-block;width: 100%;height: 30px;line-height: 30px;text-align: center;}
+       .box ul{position: relative;height: 30px;overflow: hidden;}
+       .box ul li{position: absolute;left: 0;top: 0;}
+       .box ul li:nth-of-type(1){top: 0;}
+       .box ul li:nth-of-type(2){top: 30px;}
+       .box .btnG{display: inline-block;width: 100%;text-align: center;padding:10px 0;border-top: 1px solid #EEEEEE;}
+       .box .btnG button{width: 30%;margin:0 10px;border-radius: 5px;font-size: 14px;font-weight: normal;}
+       .box .btnG .ok{background: green;}
+       /* 备忘录 */
+       #reminder{padding: 16px 10px;border-top: 1px solid #bbbbbb;margin-top: 10px;}
+       #reminder h3{width: 100%;height: 30px;line-height: 30px;font-size: 16px;overflow: hidden;color: #333333;}
+       #reminder h3 a{display: block;width: 20px;height: 20px;border: 1px solid #aaaaaa;border-radius: 50%;text-align: center;line-height: 20px;float: right;margin: 5px 0;background: #008000;color: #FFFFFF;}
+       #reminder ul{padding-left: 2px;}
+       #reminder ul li{width: 100%;height: 30px;line-height: 30px;box-shadow: 1px 1px 5px 1px #999999;margin-top: 10px;text-indent: 10px;}
+       #reminder ul li .left{width: 70%;float: left;}
+       #reminder ul li *{display:block;height: 30px;line-height: 30px;float: left;}
+       #reminder ul li .rTitle{width: 42%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+       #reminder ul li .right{width: 20%;float: right;text-align: right;}
+       #reminder ul li a{display: inline-block;width: 40%;height: 30px;line-height: 30px;text-align: center;float: left;}
+       #reminder ul li .rModify{color: #008000;}
+       #reminder ul li .rDelete{color: #FF0000;}
+       #reminder .ReminderUl{display: none;}
+		/* 备忘录编辑框 */
+	   .rEditBox{width: 298px;height: 260px;position: absolute;left: 20px;top: 50px;background: #CCCCCC;padding: 16px;border-radius: 5px;display: none;}
+	   .rEditBox label{display: block;float: left;}
+	   .rEditBox input,.rEditBox textarea{display: inline-block;background: #EEEEEE;}
+	   .rEditBox input:focus,.rEditBox textarea:focus{background: #FFFFFF;}  
+	   .rEditBox .liTime{width: 100%;height: 30px;line-height: 30px;}
+	   .rEditBox .liTime input{width: 30px;height: 22px;line-height: 22px;text-align: center;margin:0 4px;}
+	   .rEditBox .liTime input:nth-of-type(1){width: 46px;}   
+	   .rEditBox .liTitleBox{width: 100%;margin-top: 10px;}
+	   .rEditBox .liTitleBox input{width: 240px;height: 26px;line-height: 26px;text-indent: 6px;border: 1px solid #AAAAAA;}
+	   .rEditBox .liTitleBox input:focus{background: #FFFFFF;} 
+	   .rEditBox .liEditBox{width: 100%;margin-top: 10px;}
+	   .rEditBox .liEditBox textarea{width: 228px;height: 120px;padding:2px 6px;line-height: 22px;color: #555555;}
+	   .rEditBox .liBtnG{width: 100%;text-align: center;margin-top: 10px;}
+	   .rEditBox .liBtnG button{display: inline-block;width: 60px;height: 30px;line-height: 30px;margin: 0 4px;color: #FFFFFF;cursor: pointer;}
+	   .rEditBox .liBtnG .liSave{background: #008000;}
+	   .rEditBox .liBtnG .liBack{background: #FF0000;}
+	</style>
+</head>
+<body>
+	<div id="div1">
+		<div class="top">
+			<div class="voice">
+				<p><span></span><a href="javascript:;" class="vEdit">EDIT</a></p>
+				<p><input type="text" value="" /><button class="vOk">OK</button><button class="vDeny">DENY</button></p>
+			</div>
+			<canvas id="clock">
+				回到今天
+			</canvas>
+		<!--	<a href="javascript:;">回到今天</a>-->
+		</div>
+		<div class="change">
+			<button class="prevM"><</button>
+			<div class="timeNow"><span></span>年<span></span>月</div>
+			<button class="nextM">></button>
+		</div>
+		<div class="box">
+			<h3>设置日期</h3>
+			<div class="yChoose">
+				<button class="plus">+</button>
+				<ul>
+					<li></li>
+				</ul>
+				<input type="text" value="" />
+				<button class="minus">-</button>
+			</div>
+			<div class="mChoose">
+				<button class="plus">+</button>
+				<ul>
+					<li></li>
+				</ul>
+				<input type="text" value="" />
+				<button class="minus">-</button>
+			</div>
+			<div class="btnG">
+				<button class="ok">确定</button>
+				<button class="cancel">取消</button>
+			</div>
+		</div>
+		<ul id="head" class="clear">
+			<li class="colorRed">日</li>
+	        <li>一</li>
+	        <li>二</li>
+	        <li>三</li>
+	        <li>四</li>
+	        <li>五</li>
+	        <li class="colorRed">六</li>
+		</ul>
+		<ul id="list" class="clear"></ul>
+		<div id="reminder" class="clear">
+			<!--<h3>04月05日</h3>-->
+			<h3>我替你记得：<a href="javascript:;" class="addLi">+</a></h3>
+			<ul class="subReminderUl">
+				<li style='color: #999999;'>添加备忘录...</li>
+			</ul>
+			<ul class="ReminderUl">
+				<!--<li>
+					<div class="left">
+						<span class="rTime">2018-10-23</span>
+						<i>：</i>
+						<span class="rTitle">记得去看云</span>
+					</div>
+					<div class="right">
+						<a href="javascript:;" class="rModify">改</a>
+						<a href="javascript:;" class="rDelete">删</a>
+					</div>
+				</li>-->
+			</ul>
+		</div>
+		<div class="rEditBox">
+			<div class="liTime">
+				<label>时间：</label>
+				<input class="liTimeY" type="text" value="">年
+				<input class="liTimeM" type="text" value="">月
+				<input class="liTimeD" type="text" value="">日
+			</div>
+			<div class="liTitleBox">
+				<label>标题：</label>
+				<input class="liTitle" type="text" value="" placeholder="请输入标题-" />
+			</div>
+			<div class="liEditBox">
+				<label>内容：</label>
+				<textarea class="liEdit" placeholder="请输入内容-"></textarea>
+			</div>
+			<div class="liBtnG">
+				<button class="liSave">保存</button>
+				<button class="liBack">撤销</button>
+			</div>
+			
+		</div>
+	</div>
+	<script type="text/javascript">
+		var calBox = document.querySelector("#div1");
+		var list = document.querySelector("#div1 #list");
+		
+		//上月和下月的切换
+		var prevM = document.querySelector(".prevM");
+		var nextM = document.querySelector(".nextM");
+		//当前时间显示的日历
+		var timeNow = document.querySelector(".timeNow");
+		var spans = timeNow.querySelectorAll("span");
+		//选择年月的框
+		var box = document.querySelector(".box");
+		var yChoose  = document.querySelector(".yChoose");
+		var yPlus = yChoose.querySelector(".plus");
+		var yMinus = yChoose.querySelector(".minus");
+		var yUl = yChoose.querySelector("ul");
+		var yLis = yChoose.querySelectorAll("li");
+		var mChoose  = document.querySelector(".mChoose");
+		var mPlus = mChoose.querySelector(".plus");
+		var mMinus = mChoose.querySelector(".minus");
+		var mUl = mChoose.querySelector("ul");
+		var mLis = mChoose.querySelectorAll("li");
+		var okBtn = document.querySelector(".ok");
+		var cancelBtn = document.querySelector(".cancel");
+		//voice编辑框
+		var vSpan = document.querySelector(".voice span");
+		var vEdit = document.querySelector(".voice .vEdit");
+		var vModify = document.querySelectorAll(".voice p");
+		var vInput = document.querySelector(".voice input");
+		var vOk = document.querySelector(".vOk");
+		var vDeny = document.querySelector(".vDeny");
+		//备忘录生成框
+		var addLi = document.querySelector(".addLi");
+		var rEditBox = document.querySelector(".rEditBox");
+		var liTimeY = rEditBox.querySelector(".liTimeY");
+		var liTimeM = rEditBox.querySelector(".liTimeM");
+		var liTimeD = rEditBox.querySelector(".liTimeD");
+		var liTitle = rEditBox.querySelector(".liTitle");
+		var liTextarea = rEditBox.querySelector(".liEdit");
+		var liSave = rEditBox.querySelector(".liSave");
+		var liBack = rEditBox.querySelector(".liBack");
+		//备忘录
+		var subRemindList = document.querySelector("#reminder .subReminderUl");
+		var remindList = document.querySelector("#reminder .ReminderUl");
+		//用来存放当前显示月中的每一天，这样方便在外部添加时间；
+		var aDate = [];
+		//选择所有输入框，给所有的input加效果
+		var allInputs = document.querySelectorAll("input");
+		for(var i=0;i<allInputs.length;i++){
+			allInputs[i].onfocus = function(){
+				this.select();
+			}
+		}
+		//画canvas时钟
+		var clockCan = document.getElementById("clock");
+		var clockCtx = clockCan.getContext("2d");
+		//使用到的数值
+		clockCtx.clearRect(0,0,clockCan.width,clockCan.width);
+		clockCan.width = 44;
+		clockCan.height = clockCan.width;
+		var r = (clockCan.width-2)/2;
+		drawTime();
+		setInterval(function(){
+			//当前时间
+			drawTime();
+			
+		},1000);
+		function drawTime(){
+			clockCtx.clearRect(0,0,clockCan.width,clockCan.width);
+			//画圆盘
+			clockCtx.save();
+			clockCtx.beginPath();
+			clockCtx.translate(1,1);
+			clockCtx.arc(r,r,r,0,Math.PI*2,true);
+			clockCtx.strokeStyle = "red";
+			clockCtx.stroke();
+			clockCtx.restore();
+			//画刻度
+			for(var i=0;i<60;i++){
+				clockCtx.save();
+				clockCtx.beginPath();
+				clockCtx.lineWidth = 1;
+				var lineH = 2;
+				if(i%5 == 0){
+					lineH = 4;
+				}
+				clockCtx.translate(r+1,r+1);
+				var rotateDeg = 6/180*Math.PI;
+				clockCtx.rotate(rotateDeg*(i-1));
+				clockCtx.moveTo(r*Math.cos(rotateDeg),r*Math.sin(rotateDeg));
+				clockCtx.lineTo((r-lineH)*Math.cos(rotateDeg),(r-lineH)*Math.sin(rotateDeg));
+				clockCtx.strokeStyle = "red";
+				clockCtx.stroke();
+				clockCtx.restore();
+			}
+			//画圆心
+			clockCtx.save();
+			clockCtx.translate(r+1,r+1);
+			clockCtx.arc(0,0,2,0,Math.PI*2,true);
+			clockCtx.fillStyle = "rgba(0,0,0,0.8)";
+			clockCtx.fill();
+			clockCtx.restore();
+			var time = new Date();
+			sec = time.getSeconds();
+			min = time.getMinutes();
+			hou = (time.getHours()+min/60)%12;
+			hDeg = (30*hou)/360*Math.PI;
+			mDeg = (6*min)/360*Math.PI;
+			sDeg = (6*sec)/360*Math.PI;
+			drawPointer(hDeg,mDeg,sDeg);
+			//写文字
+			clockCtx.save();
+			clockCtx.scale(0.8,0.8);
+			clockCtx.font = "bold 12px 宋体";
+			clockCtx.fillStyle = "#333333";
+			clockCtx.fillText("回到今天",2,r+16);
+			clockCtx.stroke();
+			clockCtx.restore();
+		}
+		function drawPointer(hDeg,mDeg,sDeg){
+			//画时针
+			clockCtx.save();
+			clockCtx.beginPath();
+			var hLen = 6;
+			clockCtx.translate(r+1,r+1);
+			var rotateDeg = hDeg;
+			clockCtx.rotate(rotateDeg-Math.PI/2);
+			clockCtx.moveTo(-2*Math.cos(rotateDeg),-2*Math.sin(rotateDeg));
+			clockCtx.lineTo(hLen*Math.cos(rotateDeg),hLen*Math.sin(rotateDeg));
+			clockCtx.lineWidth = 3;
+			clockCtx.strokeStyle = "#ff0000";
+			clockCtx.stroke();
+			clockCtx.restore();
+			//画分针
+			clockCtx.save();
+			clockCtx.beginPath();
+			var mLen = 13;
+			clockCtx.translate(r+1,r+1);
+			var rotateDeg = mDeg;
+			clockCtx.rotate(rotateDeg-Math.PI/2);
+			clockCtx.moveTo(-2*Math.cos(rotateDeg),-2*Math.sin(rotateDeg));
+			clockCtx.lineTo(mLen*Math.cos(rotateDeg),mLen*Math.sin(rotateDeg));
+			clockCtx.lineWidth = 2;
+			clockCtx.strokeStyle = "#ff0000";
+			clockCtx.stroke();
+			clockCtx.restore();
+			//画秒针
+			clockCtx.save();
+			clockCtx.beginPath();
+			var sLen = 14;
+			clockCtx.translate(r+1,r+1);
+			var rotateDeg = sDeg;
+			clockCtx.rotate(rotateDeg-Math.PI/2);
+			clockCtx.moveTo(-2*Math.cos(rotateDeg),-2*Math.sin(rotateDeg));
+			clockCtx.lineTo(sLen*Math.cos(rotateDeg),sLen*Math.sin(rotateDeg));
+			clockCtx.lineWidth = 1;
+			clockCtx.strokeStyle = "#FF0000";
+			clockCtx.stroke();
+			clockCtx.restore();
+		}
+		//记录输入框中的年月
+		var yVal = 0;
+		var mVal = 0;
+		//获取当前日期
+		var nowDate = new Date();
+		//初始化
+		var nowY = nowDate.getFullYear();//2017
+		var nowM = nowDate.getMonth(); //2
+		var nowD = nowDate.getDate();
+		//console.log(nowD);
+		//用来标记today
+		var nowDateToday = nowDate.getDate();
+		outputTime(nowY,nowM);
+		//点击canvas，回到今天
+		clockCan.onclick = function(){
+			outputTime(nowY,nowM);
+		}
+		//用来切换日期的初始值，后面随着点击会自增自减；
+		var y = nowY;
+		var m = nowM; 
+		var onOff = true;
+		//初始显示
+		yLis[0].innerHTML = nowY;
+		mLis[0].innerHTML = addZero(nowM+1);
+		/*上下月切换 start*/
+		//上月按钮
+		prevM.onclick = function(){
+			m --;//期望值是1
+			var Pdate = new Date(y,m);//重新设置日期，就是想利用日期对象的自动纠错能力
+			outputTime(Pdate.getFullYear(),Pdate.getMonth());
+		}
+		//下月按钮
+		nextM.onclick = function(){
+			m ++;
+			var Ndate = new Date(y,m);
+			outputTime(Ndate.getFullYear(),Ndate.getMonth());
+		}
+		/*上下月切换 end*/
+		/*手动选择年月 start*/
+		//打开年月输入框
+		var yChooseIn = yChoose.querySelector("input");
+		var mChooseIn = mChoose.querySelector("input");
+		timeNow.onclick = function(e){
+			yChoose.querySelectorAll("li")[0].innerHTML = nowY;
+			mChoose.querySelectorAll("li")[0].innerHTML = addZero(nowM+1);
+			yVal = yLis[0].innerHTML;
+			mVal = mLis[0].innerHTML;
+			yChooseIn.value = yVal;
+			mChooseIn.value = mVal;
+			box.style.display = "block";
+			e.stopPropagation();
+		}
+		//输入框中的年份
+		yVal = yLis[0].innerHTML;
+		yMinus.onclick = function(e){
+			yChooseIn.style.display = "none";
+			yVal = changDate(yUl,-1,yVal);
+			yChooseIn.value = yVal;
+			e.stopPropagation();
+		}
+		yPlus.onclick = function(e){
+			yChooseIn.style.display = "none";
+			yVal = changDate(yUl,1,yVal);
+			yChooseIn.value = yVal;
+			e.stopPropagation();
+		}
+		//输入框中的月份
+		mVal = mLis[0].innerHTML;
+		mMinus.onclick = function(e){
+			mChooseIn.style.display = "none";
+			mVal = changDate(mUl,-1,mVal);
+			mChooseIn.value = addZero(mVal);
+			e.stopPropagation();
+		}
+		mPlus.onclick = function(e){
+			mChooseIn.style.display = "none";
+			mVal = changDate(mUl,1,mVal);
+			mChooseIn.value = addZero(mVal);
+			e.stopPropagation();
+		}
+		//通过输入框输入年月
+		yChoose.querySelector("ul").onclick = function(){
+			yChooseIn.style.display = "block";
+			yChooseIn.focus();
+		}
+		yChooseIn.onblur = function(){
+			yUl.querySelectorAll("li")[0].innerHTML = yChooseIn.value;
+		}
+		mChoose.querySelector("ul").onclick = function(){
+			mChooseIn.style.display = "block";
+			mChooseIn.focus();
+		}
+		mChooseIn.onblur = function(){
+			mUl.querySelectorAll("li")[0].innerHTML = mChooseIn.value;
+			console.log(mUl.querySelectorAll("li")[0].innerHTML);
+		}
+		//输入框的确认按钮
+		okBtn.onclick = function(e){
+			box.style.display = "none";
+			//console.log(yVal,mVal);
+			outputTime(parseInt(yChooseIn.value),parseInt(mChooseIn.value)-1);
+			//上个月和下个月的值也要变
+			y = yChooseIn.value;
+			m = mChooseIn.value-1;
+			e.stopPropagation();
+		}
+		//输入框的取消按钮
+		cancelBtn.onclick = function(e){
+			box.style.display = "none";
+			//console.log(yVal,mVal);
+			//outputTime(nowY,nowM);
+			e.stopPropagation();
+		}
+		//点击整个框的时候
+		/*calBox.onclick = function(){
+			box.style.display = "none";
+		}*/
+		/*手动选择年月 end*/
+		/*操作顶部的语录 start*/
+		vSpan.innerHTML = "我的心中每天开出一朵花";
+		vEdit.onclick = function(){
+			vModify[0].style.display = "none";
+			vModify[1].style.display = "block";
+			vInput.value = vSpan.innerHTML;
+		}
+		vInput.onfocus = function(){
+			this.select();
+		}
+		vOk.onclick = function(){
+			vModify[0].style.display = "block";
+			vModify[1].style.display = "none";
+			vSpan.innerHTML = vInput.value;
+		}
+		vDeny.onclick = function(){
+			vModify[0].style.display = "block";
+			vModify[1].style.display = "none";
+			vInput.value = vSpan.innerHTML;
+		}
+		/*操作顶部的语录 end*/
+		/* 备忘录 start */
+		//给textarea添加点击事件
+		liTextarea.onfocus = function(){
+			this.select();
+		}
+		//点击添加按钮添加备忘
+		//设置默认年月
+		addLi.onclick = function(){
+			liTimeY.value = nowY;
+			liTimeM.value = addZero(nowM+1);
+			liTimeD.value = addZero(nowD);
+			liObj = document.querySelector(".today");
+			rEditBox.style.display = "block";
+		}
+		//保存备忘录
+		liSave.onclick = function(){
+			saveReminder(liTimeY.value,liTimeM.value,liTimeD.value,liObj);
+		}
+		//撤销备忘录
+		liBack.onclick = function(){
+			rEditBox.style.display = "none";
+			//重置
+			liTimeY.value = nowY;
+			liTimeM.value = nowM;
+			liTimeD.value = nowD;
+			liTitle.value = "";
+			liTextarea.value = "";
+		}
+		/* 下面是封装的一些函数  */
+		//动态输出日期，传入当前年份和月份（月份从0算）[在这里面给每一天添加点击事件]
+		function outputTime(y,m){
+			aDate.length = 0;
+			spans[0].innerHTML = y;
+			spans[1].innerHTML = addZero(m+1);
+			//获取需要多少格
+			//var cells = getCells(y,m);
+			var cells = 42;
+			//当月的总天数
+			var days = getCountDays(y,m);
+			var str = "";
+			//获取这个月的第一天
+			var d = new Date(y,m,1,0,0,0);
+			//获取这个月第一天对应的星期
+			var week = d.getDay() - 1;
+			//console.log(week);
+			for(var i=0;i<cells;i++){ 
+				var v = i-week;
+				//如果本月第一天是星期天，则上个月显示一个星期
+				if(week == -1){
+					v = i-week - 7;
+				}
+				if(v>0&&v<=days){
+					//指出today
+					if(nowDateToday == v && y == nowY && m == nowM){
+						str += "<li class='today'><span>"+v+"</span></li>";
+					}else{
+						if(i%7 == 6 || i%7 == 0){
+							str += "<li class='red'><span>"+v+"</span></li>";
+						}else{
+							str += "<li><span>"+v+"</span></li>";
+						}
+					}
+					//console.log(v);
+				}else if(v<=0){
+					//补上一个月的
+					var lastDays = getCountDays(y,m-1);
+					str += "<li class='gray'><span>"+(lastDays+v)+"</span></li>";
+				}else{
+					//补下一个月的
+					str += "<li class='gray'><span>"+(v - days)+"</span></li>";
+				}
+			}
+			list.innerHTML = str;
+			//给每个li添加操作备忘录的功能
+				//querySelectorAll 不能动态获取内容
+			var everydays = list.querySelectorAll("li");
+			for(var i=0;i<everydays.length;i++){
+				aDate.push(everydays[i]);
+			}
+			//console.log(aDate);
+			//给当前显示的月分中的每一个li添加备忘，这段代码好像必须要放在aDate更新的后面执行，如果是下个月的就跳转到下个月
+			aDate.forEach(function(ele,index){
+				var num = index -week;
+				if(num<=0){
+					ele.onclick = function(){
+						m --;//期望值是1
+						var Pdate = new Date(y,m);//重新设置日期，就是想利用日期对象的自动纠错能力
+						outputTime(Pdate.getFullYear(),Pdate.getMonth());
+					}
+				}else if(num>0&&num<=days){
+					ele.onclick = function(){
+						rEditBox.style.display = "block";
+						//设置默认年月
+						liTimeY.value = spans[0].innerHTML;
+						liTimeM.value = spans[1].innerHTML;
+						liTimeD.value = addZero(this.querySelector("span").innerHTML);
+						liObj = ele;
+					}
+				}else{
+					ele.onclick = function(){
+						m ++;
+						var Ndate = new Date(y,m);
+						outputTime(Ndate.getFullYear(),Ndate.getMonth());
+					}
+				}
+				
+			});
+		}
+		
+		//获取某年月需要的总格数
+		function getCells(y,m){
+			var d1 = new Date(y,m,1,0,0,0);
+			return Math.ceil((getCountDays(y,m) + d1.getDay())/7)*7;
+		}
+		
+		//获取指定年月的最大天数
+		function getCountDays(y,m){
+			//设置下个月的第一天
+			var d1 = new Date(y,m+1,1,0,0,0);
+			//设置时间为下个月的第一天往前减一天
+			d1.setDate(d1.getDate()-1);
+			//返回这一天的 日期号，即为本月的天数
+			return d1.getDate();
+		}
+		
+		//切换年月时，上下的滚动效果封装
+		//changDate(yUl,1,yVal);
+		function changDate(obj,flag,valDate){
+			if(!onOff){
+				return;
+			}
+			onOff = false;
+			//增 flag = 1
+			var val = 30;
+			if(flag < 0){
+				val = -val;
+			}
+			//获取第一个li
+			var cur = obj.querySelectorAll("li")[0];
+			//生成下一个li
+			valDate = parseInt(cur.innerHTML);
+			var prev = document.createElement("li");
+			valDate += flag
+			//如果是月份就要控制范围
+			if(obj == mUl){
+				if(valDate == 0){
+					valDate = 12;
+				}
+				if(valDate == 13){
+					valDate = 1;
+				}
+			}
+			prev.innerHTML = addZero(valDate);
+			prev.style.top = -val + 'px';
+			obj.appendChild(prev);
+			//动画效果
+			animation(cur,{"top":val},500);
+			animation(prev,{"top":0},500,function(){
+				obj.removeChild(cur);
+				cur = null;
+				onOff = true;
+				//console.log(valDate);
+				//return valDate;//放着这里返回的是undefined
+			});
+			return valDate;
+		}
+		//动画
+		function animation(obj ,attrObj ,t ,callback){
+			//元素起始运动的位置
+			var startObj = {};
+			for(var attr in attrObj){
+				startObj[attr] = parseInt(getComputedStyle(obj)[attr]);
+			}
+			//运动总距离 d
+			var dObj = {};
+			for(var attr in attrObj){
+				dObj[attr] = attrObj[attr] - startObj[attr];
+			}
+			//运动起始时间
+			var startT = Date.now();
+			var timer = setInterval(function(){
+				//运动花费的时间
+				var spend = Date.now() - startT;
+				if(spend >= t){
+					spend = t;
+					clearInterval(timer);
+				}
+				for(var attr in attrObj){
+					//元素此时在的位置 val
+					var val = startObj[attr] + (dObj[attr]/t)*spend;
+					obj.style[attr] = val + "px";
+				}
+				if(spend == t){
+					callback && typeof callback == "function" && callback();
+				}
+			},16);
+		}
+			
+		//给月份补零
+		function addZero(val){
+			return val>=10 ? val : "0"+val;
+		}
+		//把class相同的备忘放在一个数组中
+		var codeLi = {};
+		//保存备忘录的函数
+		function saveReminder(y,m,d,obj){
+			aRemindLi = [];
+			if(liTitle.value.trim() == ""){
+				alert("标题不能为空");
+				return ;
+			}
+			/*？？？？
+				这里还要加入年月日的判断，因为暂时还不会正则，暂且不做判断
+			*/
+			rEditBox.style.display = "none";
+			/*	我想限制每个日期只能添加一天提醒，这样方便我删除记录的时候好对应删除
+			 * for(var i =0;i<remindList.querySelectorAll("li");i++){
+				
+			}*/
+			remindList.innerHTML += `<li data-em="${'c_'+y+m+d}">
+				<div class="left">
+					<span class="rTime">${y}-${m}-${d}</span>
+					<i>：</i>
+					<span class="rTitle">${liTitle.value}</span>
+				</div>
+				<div class="right">
+					<a href="javascript:;" class="rModify">改</a>
+					<a href="javascript:;" class="rDelete">删</a>
+				</div>
+			</li>`;
+			remindList.style.display = "block";
+			subRemindList.style.display = "none";
+			//给每条备忘录的em添加class,class名字有年月日组成，
+			if(!obj.querySelector("em")){
+				var oEm = document.createElement("em");
+				oEm.innerHTML = liTitle.value.substring(0,5);
+				oEm.className = 'c_'+y+m+d;//后期删除用
+				//把em追加到日期中显示
+				obj.appendChild(oEm);
+			}else{
+				oEm = obj.querySelector("em")
+			}
+			if(!codeLi[oEm.className]){
+				codeLi[oEm.className] = [];
+			}
+			codeLi[oEm.className].push(liTitle.value);
+			console.log(codeLi);
+			if(obj.querySelector("em") == null){
+				
+			}
+			// 为空后，placeholder就显示出来了
+			liTitle.value = "";
+			liTextarea.value = "";
+			//删除修改已添加的备忘录，同时删除日期中的标记
+			for(var i=0;i<remindList.querySelectorAll("li").length;i++){
+				var objKey = 'c_'+y+m+d;
+				objLi = remindList.querySelectorAll("li")[i];
+				aRemindLi.push(objLi);
+				//aRemindLi.push(remindList.querySelectorAll("li")[i]);
+			}
+			//console.log(aRemindLi);
+			removeLi(aRemindLi);
+		}
+		
+		//删除修改已经添加的备忘
+		function removeLi(aRemindLi){
+			aRemindLi.forEach(function(ele,index,array){
+				var rModify = array[index].querySelector(".rModify"); //备用
+				var rDelete = array[index].querySelector(".rDelete"); 
+				rDelete.onclick = function(){
+					var _this = this;
+					//过滤出相同data-em的li备忘，即通过天的备忘
+					var aTargetLi = aRemindLi.filter(function(ele){
+						var eleAttr = ele.getAttribute("data-em");
+						if(eleAttr == _this.parentNode.parentNode.getAttribute("data-em")){
+							return ele;
+						}
+					});
+					//这是将被删除元素在当天记录中的索引位置
+					var targetIndex = aTargetLi.indexOf(this.parentNode.parentNode);
+					//删除备忘录中的li
+					remindList.removeChild(this.parentNode.parentNode);
+					aRemindLi.splice(index,1);
+					//删除日期中的记录，获取对象的keys值
+					var rLi = this.parentNode.parentNode.getAttribute("data-em");
+					codeLi[rLi].splice(targetIndex,1);
+					var curLi = list.querySelector('.'+rLi).parentNode;
+					if(codeLi[rLi].length == 0){
+						curLi.removeChild(list.querySelector('.'+rLi));
+					}else{
+						list.querySelector('.'+rLi).innerHTML = codeLi[rLi][0].substring(0,5);
+					}
+					
+					//重新设置aRemindLi数组
+					array.length = 0;
+					for(var i=0;i<remindList.querySelectorAll("li").length;i++){
+						array.push(remindList.querySelectorAll("li")[i]);
+					}
+					if(array.length == 0){
+						subRemindList.style.display = "block";
+						remindList.style.display = "none";
+					}
+				}
+			});
+		}
+		
+		
+	</script>
+</body>
+</html>
